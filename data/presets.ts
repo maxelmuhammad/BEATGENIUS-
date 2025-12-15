@@ -50,6 +50,34 @@ export const PRESETS: Preset[] = [
         synth: [880, 0, 0, 783, 0, 0, 698, 0, 0, 0, 0, 0, 0, 0, 783, 0]
     }
   },
+  {
+    id: 'memphis-doom',
+    name: 'Memphis Doom',
+    category: 'Phonk',
+    bpm: 135,
+    kit: 'phonk',
+    description: 'Heavy 808s with relentless hi-hats.',
+    pattern: {
+        kick: [true, false, false, true, true, false, false, false, true, false, false, true, true, false, false, true],
+        snare: [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false],
+        hihat: [true, true, true, false, true, true, true, false, true, true, true, false, true, true, true, false],
+        synth: [523, 0, 0, 0, 0, 0, 0, 0, 523, 0, 0, 0, 0, 0, 0, 0]
+    }
+  },
+  {
+    id: 'sahara-drift',
+    name: 'Sahara Drift',
+    category: 'Phonk',
+    bpm: 170,
+    kit: 'phonk',
+    description: 'Extreme speed drift phonk.',
+    pattern: {
+        kick: [true, false, true, false, false, false, true, false, true, false, true, false, false, false, true, false],
+        snare: [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false],
+        hihat: [true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false],
+        synth: [1046, 0, 880, 0, 783, 0, 698, 0, 783, 0, 880, 0, 1046, 0, 0, 0]
+    }
+  },
 
   // --- EVENTS ---
   {

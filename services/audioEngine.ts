@@ -170,7 +170,7 @@ class AudioEngine {
         if (this.currentKit === 'amapiano') this.playShaker(time, false, trackVolume); 
         else if (this.currentKit === 'afro') this.playRimshot(time, trackVolume);
         else if (this.currentKit === 'trap') this.playTrapSnare(time, trackVolume);
-        else if (this.currentKit === 'phonk') this.playTrapSnare(time, trackVolume * 1.2); // Phonk snare is loud
+        else if (this.currentKit === 'phonk') this.playPhonkSnare(time, trackVolume);
         else this.playSnare(time, trackVolume);
         break;
       case 'hihat':
@@ -336,6 +336,44 @@ class AudioEngine {
     oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
     osc.start(time);
     osc.stop(time + 0.1);
+  }
+
+  private playPhonkSnare(time: number, vol: number) {
+    // Aggressive, distorted Memphis snare (909-ish with grit)
+    const noise = this.ctx!.createBufferSource();
+    noise.buffer = this.noiseBuffer;
+    const filter = this.ctx!.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 1500;
+    const gain = this.ctx!.createGain();
+    
+    // Add distortion for grit
+    const distortion = this.ctx!.createWaveShaper();
+    distortion.curve = this.makeDistortionCurve(150);
+
+    noise.connect(filter);
+    filter.connect(distortion);
+    distortion.connect(gain);
+    this.connectOutput(gain);
+
+    gain.gain.setValueAtTime(1.2 * vol, time); 
+    gain.gain.exponentialRampToValueAtTime(0.01, time + 0.12);
+    noise.start(time);
+    noise.stop(time + 0.12);
+
+    // Tonal body
+    const osc = this.ctx!.createOscillator();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(220, time);
+    osc.frequency.exponentialRampToValueAtTime(100, time + 0.08);
+    const oscGain = this.ctx!.createGain();
+    osc.connect(oscGain);
+    this.connectOutput(oscGain);
+
+    oscGain.gain.setValueAtTime(0.9 * vol, time);
+    oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.08);
+    osc.start(time);
+    osc.stop(time + 0.08);
   }
 
   private playRimshot(time: number, vol: number) { // For Afro
