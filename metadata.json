@@ -1,0 +1,5 @@
+{
+  "name": "BeatGenius AI",
+  "description": "A smart step sequencer and beat generator powered by Gemini. Create music with synthesized drums and tones, or ask AI to generate patterns for you.",
+  "requestFramePermissions": []
+}
