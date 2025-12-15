@@ -37,6 +37,34 @@ export const PRESETS: Preset[] = [
     }
   },
   {
+    id: 'phonk-house-bounce',
+    name: 'Phonk House Bounce',
+    category: 'Phonk',
+    bpm: 125,
+    kit: 'phonk',
+    description: '4/4 kick pattern with cowbell offbeats.',
+    pattern: {
+        kick: KICK_4_FLOOR,
+        snare: SNARE_BACKBEAT,
+        hihat: [false, false, true, false, false, false, true, false, false, false, true, false, false, false, true, false],
+        synth: [0, 622, 0, 622, 0, 523, 0, 523, 0, 698, 0, 698, 0, 523, 0, 0]
+    }
+  },
+  {
+    id: 'glock-phonk-triplet',
+    name: 'Glock Phonk Triplet',
+    category: 'Phonk',
+    bpm: 150,
+    kit: 'phonk',
+    description: 'Fast triplet flow with distorted bass.',
+    pattern: {
+        kick: [true, false, true, false, false, false, true, false, false, false, true, false, false, false, true, false],
+        snare: [false, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false],
+        hihat: [true, true, true, false, true, true, true, false, true, true, true, false, true, true, true, false],
+        synth: [130, 0, 0, 130, 0, 0, 0, 0, 150, 0, 0, 150, 0, 0, 0, 0] // Bass low notes
+    }
+  },
+  {
     id: 'chill-phonk-lofi',
     name: 'Chill Phonk Lofi',
     category: 'Phonk',

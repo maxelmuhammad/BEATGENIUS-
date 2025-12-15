@@ -179,7 +179,14 @@ class AudioEngine {
         else this.playHiHat(time, trackVolume);
         break;
       case 'synth':
-        if (this.currentKit === 'phonk') this.playCowbell(time, pitch, trackVolume);
+        if (this.currentKit === 'phonk') {
+          // PHONK SPECIAL: Split synth track. Low pitch = Bass, High pitch = Cowbell
+          if (pitch && pitch < 200) {
+            this.playPhonkBass(time, pitch, trackVolume);
+          } else {
+            this.playCowbell(time, pitch, trackVolume);
+          }
+        }
         else if (this.currentKit === 'amapiano') this.playLogDrum(time, pitch, trackVolume);
         else if (this.currentKit === 'afro') this.playKalimba(time, pitch, trackVolume);
         else if (this.currentKit === 'trap') this.playDarkSynth(time, pitch, trackVolume);
@@ -514,6 +521,42 @@ class AudioEngine {
     osc2.start(time);
     osc.stop(time + 0.6);
     osc2.stop(time + 0.6);
+  }
+
+  // PHONK BASS (Reese Bass Style)
+  private playPhonkBass(time: number, pitch: number = 100, vol: number) {
+    const osc1 = this.ctx!.createOscillator();
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(pitch, time);
+    
+    const osc2 = this.ctx!.createOscillator();
+    osc2.type = 'sawtooth';
+    osc2.frequency.setValueAtTime(pitch, time);
+    osc2.detune.value = 15; // Detuned for reese width
+
+    const filter = this.ctx!.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(800, time);
+    
+    // Distortion for grit
+    const distortion = this.ctx!.createWaveShaper();
+    distortion.curve = this.makeDistortionCurve(100);
+
+    const gain = this.ctx!.createGain();
+    
+    osc1.connect(filter);
+    osc2.connect(filter);
+    filter.connect(distortion);
+    distortion.connect(gain);
+    this.connectOutput(gain);
+
+    gain.gain.setValueAtTime(0.8 * vol, time);
+    gain.gain.exponentialRampToValueAtTime(0.01, time + 0.5);
+
+    osc1.start(time);
+    osc2.start(time);
+    osc1.stop(time + 0.5);
+    osc2.stop(time + 0.5);
   }
 
   // PHONK COWBELL
