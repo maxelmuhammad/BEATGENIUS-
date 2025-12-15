@@ -1,20 +1,31 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# BeatGenius AI
 
-# Run and deploy your AI Studio app
+A smart step sequencer and beat generator powered by Gemini.
 
-This contains everything you need to run your app locally.
+## Features
+- **AI Generation**: Type a prompt to generate beats (e.g., "Amapiano groove").
+- **Customizable**: Add/Remove tracks (Kick, Snare, HiHat, Synth).
+- **Presets**: Built-in styles for Phonk, Afro, Amapiano, etc.
+- **Record**: Export your beat as audio.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1HB6Mt8iaGxB-v_9ju1jGwpnj2XkSggZV
+## Installation
 
-## Run Locally
+1.  Clone the repository.
+2.  Run `npm install` to install dependencies.
+3.  Create a `.env` file and add your Google Gemini API key:
+    ```
+    API_KEY=your_api_key_here
+    ```
+4.  Run `npm run dev` to start the local server.
 
-**Prerequisites:**  Node.js
+## Deployment
 
+### Netlify
+1.  Connect your repo to Netlify.
+2.  Set the Build Command to `npm run build`.
+3.  Set the Publish Directory to `dist`.
+4.  Add `API_KEY` in Site Settings > Environment Variables.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### GitHub Pages
+1.  Go to Settings > Actions > General and ensure "Read and write permissions" are enabled.
+2.  This app uses Vite, so standard GitHub Pages deployment workflows apply.

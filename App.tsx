@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Sequencer from './components/Sequencer';
 import Onboarding from './components/Onboarding';
-import { Track, Step, PatternData, SCALES, Preset, KitType, SynthWaveform } from './types';
+import { Track, Step, PatternData, SCALES, Preset, KitType, SynthWaveform, InstrumentType } from './types';
 import { audioEngine } from './services/audioEngine';
 import { generatePattern } from './services/geminiService';
 import { PRESETS } from './data/presets';
-import { Play, Pause, Sparkles, RefreshCw, AlertCircle, Loader2, Activity, Music2, ChevronRight, X, Volume2, Menu, Settings2, Sliders, Disc, Download } from 'lucide-react';
+import { Play, Pause, Sparkles, RefreshCw, Disc, Loader2, Activity, Menu, Sliders, X, Volume2 } from 'lucide-react';
 
 // Default State
 const DEFAULT_TRACKS: Track[] = [
@@ -238,31 +238,65 @@ export default function App() {
     }
   };
 
+  const handleAddTrack = (type: InstrumentType) => {
+    const newId = `${type}-${Date.now()}`;
+    let color = 'bg-zinc-500';
+    if (type === 'kick') color = 'bg-rose-500';
+    else if (type === 'snare') color = 'bg-amber-500';
+    else if (type === 'hihat') color = 'bg-cyan-500';
+    else if (type === 'synth') color = 'bg-purple-500';
+
+    const newTrack: Track = {
+      id: newId,
+      name: `${type.charAt(0).toUpperCase() + type.slice(1)}`,
+      type,
+      color,
+      muted: false,
+      volume: 0.8,
+      steps: Array(16).fill(null).map(() => ({ active: false }))
+    };
+    
+    setTracks(prev => [...prev, newTrack]);
+  };
+
+  const handleRemoveTrack = (id: string) => {
+    setTracks(prev => {
+        if (prev.length <= 1) return prev; // Prevent deleting last track
+        return prev.filter(t => t.id !== id);
+    });
+  };
+
   const loadPreset = (preset: Preset) => {
     setBpm(preset.bpm);
     setCurrentKit(preset.kit);
     setSelectedPresetId(preset.id);
-    setTracks(prev => prev.map(track => {
-      let newSteps: boolean[] = [];
-      let pitchData: number[] = [];
-      
-      if (track.id === 'kick') newSteps = preset.pattern.kick;
-      else if (track.id === 'snare') newSteps = preset.pattern.snare;
-      else if (track.id === 'hihat') newSteps = preset.pattern.hihat;
-      else if (track.id === 'synth') pitchData = preset.pattern.synth;
-
-      if (track.id === 'synth') {
-        return {
-          ...track,
-          steps: pitchData.map(p => ({ active: p > 0, pitch: p > 0 ? p : undefined }))
-        };
-      } else {
-        return {
-          ...track,
-          steps: newSteps.map(active => ({ active }))
-        };
-      }
-    }));
+    
+    // For simplicity, presets reset tracks to the standard 4, then map pattern
+    // This avoids complexity of mapping preset data to arbitrary user tracks
+    setTracks(prev => {
+        const baseTracks = DEFAULT_TRACKS.map(t => ({...t, steps: t.steps.map(() => ({ active: false }))}));
+        return baseTracks.map(track => {
+            let newSteps: boolean[] = [];
+            let pitchData: number[] = [];
+            
+            if (track.id === 'kick') newSteps = preset.pattern.kick;
+            else if (track.id === 'snare') newSteps = preset.pattern.snare;
+            else if (track.id === 'hihat') newSteps = preset.pattern.hihat;
+            else if (track.id === 'synth') pitchData = preset.pattern.synth;
+    
+            if (track.id === 'synth') {
+            return {
+                ...track,
+                steps: pitchData.map(p => ({ active: p > 0, pitch: p > 0 ? p : undefined }))
+            };
+            } else {
+            return {
+                ...track,
+                steps: newSteps.map(active => ({ active }))
+            };
+            }
+        });
+    });
     if (window.innerWidth < 1024) {
         setShowPresets(false);
     }
@@ -274,7 +308,10 @@ export default function App() {
     setError(null);
     try {
       const pattern: PatternData = await generatePattern(prompt);
-      setTracks(prev => prev.map(track => {
+      // Reset to default tracks for generation to match schema
+      const baseTracks = DEFAULT_TRACKS; 
+      
+      setTracks(baseTracks.map(track => {
         let newSteps: Step[] = [];
         if (track.id === 'kick') newSteps = pattern.kick.map(active => ({ active }));
         else if (track.id === 'snare') newSteps = pattern.snare.map(active => ({ active }));
@@ -309,8 +346,6 @@ export default function App() {
       
       {/* 
         SIDEBAR NAVIGATION 
-        - Full height on desktop
-        - Drawer on mobile
       */}
       <aside className={`
           absolute inset-y-0 left-0 z-50 w-72 bg-zinc-900/95 backdrop-blur-xl border-r border-zinc-800 transform transition-transform duration-300 ease-in-out shadow-2xl flex flex-col
@@ -429,7 +464,7 @@ export default function App() {
 
       {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col relative h-full">
-        {/* Top Header - Compact for Mobile Landscape */}
+        {/* Top Header */}
         <header className="p-2 md:p-4 border-b border-zinc-900 bg-zinc-950/80 backdrop-blur-md z-30 shrink-0 sticky top-0 flex items-center justify-between gap-3">
             
             <div className="flex items-center gap-2">
@@ -496,7 +531,6 @@ export default function App() {
                  <div className="w-px h-8 bg-zinc-800/50"></div>
 
                  <div className="flex gap-2">
-                    {/* Settings Trigger */}
                     <button onClick={() => setShowSettings(true)} className="p-2.5 text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-800 rounded-xl border border-zinc-800 transition-colors active:scale-95">
                         <Sliders size={18} />
                     </button>
@@ -535,7 +569,7 @@ export default function App() {
                 </div>
              </div>
 
-             {/* Kit Selector - STICKY AND VISIBLE */}
+             {/* Kit Selector */}
              <div className="w-full sticky top-0 z-40 py-2 -my-2 bg-zinc-950/95 backdrop-blur-sm flex justify-center border-b border-zinc-800/50 transition-all">
                 <div className="w-full max-w-5xl flex gap-2 overflow-x-auto pb-2 pt-1 no-scrollbar px-1 mask-linear-fade">
                       {KITS.map(kit => (
@@ -561,6 +595,8 @@ export default function App() {
                 onToggleStep={toggleStep}
                 onToggleMute={toggleMute}
                 onVolumeChange={handleTrackVolumeChange}
+                onRemoveTrack={handleRemoveTrack}
+                onAddTrack={handleAddTrack}
             />
             
             <div className="h-8"></div> {/* Bottom Spacer */}
